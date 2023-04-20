@@ -1,23 +1,38 @@
 type Awaiter = () => Promise<void>;
 
+interface QueueWaiter {
+    end: Array<Function>;
+    move: Array<Function>;
+    loop: Array<Function>;
+}
+
 export interface QueuedItem {
     start: Awaiter;
     stop: () => void;
 }
 
 export class Queue {
+    static readonly author = "TheDark";
+    static readonly github = "https://github.com/99TheDark/Queue";
+    private static curid = 0;
+
+    readonly id = Queue.curid++;
     private items: Array<QueuedItem>;
     private current: number;
     private running: boolean;
-    private waiters: Array<Function>;
     private repeatCount: number;
+    private waiters: QueueWaiter;
 
     constructor() {
         this.items = [];
         this.current = 0;
         this.running = false;
-        this.waiters = [];
         this.repeatCount = 0;
+        this.waiters = {
+            end: [],
+            move: [],
+            loop: []
+        };
     }
     private async run() {
         this.running = true;
@@ -26,13 +41,15 @@ export class Queue {
         this.current++;
 
         if(this.current < this.items.length) {
+            this.waiters.move.forEach(func => func());
             this.run();
         } else if(this.repeatCount > 0) {
+            this.waiters.loop.forEach(func => func());
             this.current = 0;
             this.repeatCount--;
             this.run();
         } else {
-            this.waiters.forEach(resolve => resolve());
+            this.waiters.end.forEach(resolve => resolve());
         }
 
         this.running = false;
@@ -74,8 +91,20 @@ export class Queue {
     position(): number {
         return this.current;
     }
-    async await(waiter: Awaiter = async () => {}): Promise<void> {
-        await new Promise<void>(resolve => this.waiters.push(resolve));
+    size(): number {
+        return this.items.length;
+    }
+    move(waiter: Awaiter): void {
+        this.waiters.move.push(waiter);
+    }
+    loop(waiter: Awaiter): void {
+        this.waiters.loop.push(waiter);
+    }
+    async end(waiter: Awaiter): Promise<void> {
+        await new Promise<void>(resolve => this.waiters.end.push(resolve));
         waiter();
+    }
+    toString(): string {
+        return "[object Queue]";
     }
 }
