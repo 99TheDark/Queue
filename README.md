@@ -17,5 +17,5 @@ A queue library for TypeScript! Simply download `queue.ts` and import it via `im
 `toString()` — Gives the string representation of the `queue`, being the generic `[object Queue]`. <br>
 
 ## QueuedItem interface
-`start` — Runs when the queued item begins, and completes when the task is finished by awaiting some `Promise`.
-`stop` — Activated when the item must be forced stop, where implementation is meant to cancel the current task from running.
+`start` — Runs when the queued item begins, and completes when the task is finished by awaiting some `Promise`. <br>
+`stop` — Activated when the item must be forced stop, where implementation is meant to cancel the current task from running. <br>
