@@ -14,7 +14,7 @@ class Waiting implements QueuedItem {
     async start() {
         await new Promise<void>(resolve => setTimeout(() => {
             if(!this.stoppedEarly) {
-                console.log(`Waited ${this.time / 1000} seconds.`)
+                console.log(`Waited ${this.time / 1000} seconds.`);
                 this.completed = true;
             }
             resolve();
@@ -27,13 +27,17 @@ class Waiting implements QueuedItem {
 
 const queue = new Queue();
 
-let sec = new Waiting(1);
+let sec = new Waiting(0.6);
 
 queue.push(new Waiting(0.1));
+queue.push(new Waiting(0.3));
 queue.push(new Waiting(0.05));
 queue.push(sec);
 queue.push(new Waiting(0.2));
 
 queue.discard(sec);
 
-queue.await(async () => console.log("Ended."));
+console.log(queue);
+console.log("\n\n");
+
+queue.end(async () => console.log("Ended.\n"));
